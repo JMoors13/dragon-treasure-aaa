@@ -44,9 +44,6 @@
 <p id="result"></p>
 
 <script>
-const headImg = new Image();
-headImg.src = "images/dragon_head.png";
-  
 async function checkCodes() {
   const resultEl = document.getElementById("result");
   const button = document.querySelector("button");
@@ -220,17 +217,9 @@ function startSnake(canvas) {
     ctx.fillRect(food.x, food.y, grid - 1, grid - 1);
 
     // draw snake
-    snake.forEach((segment, index) => {
-      if (index === 0) {
-        // 🐉 Head
-        ctx.drawImage(headImg, segment.x, segment.y, grid, grid);
-      } else if (index === snake.length - 1) {
-        // 🔥 Tail
-        ctx.drawImage(headImg, segment.x, segment.y, grid, grid);
-      } else {
-        // 🐍 Body
-        ctx.drawImage(headImg, segment.x, segment.y, grid, grid);
-      }
+    ctx.fillStyle = "lime";
+    snake.forEach(segment => {
+      ctx.fillRect(segment.x, segment.y, grid - 1, grid - 1);
     });
 
     // collision (self)
