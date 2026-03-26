@@ -31,8 +31,8 @@
 
   <script>
     const token = localStorage.getItem("dragonToken");
-    const time = localStorage.getItem("dragonTime");
-
+    const time = Number(localStorage.getItem("dragonTime"));
+    
     const EXPIRY = 30 * 1000; // ⏱️ 10 seconds
 
     // 🚫 Block immediately if invalid/expired
