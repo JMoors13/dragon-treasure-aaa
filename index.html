@@ -68,6 +68,7 @@ async function checkCodes() {
 
   if (data.success) {
     localStorage.setItem("dragonToken", data.token);
+    localStorage.setItem("dragonTime", Date.now());
     window.location.href = "locked.html";
   } else {
     document.getElementById("result").innerText = "❌ The vault stays sealed...";
