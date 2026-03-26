@@ -1,34 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>🐉 Dragon Treasure</title>
-
-  <style>
-    body {
-      display: none;
-      font-family: Arial;
-      text-align: center;
-      margin-top: 100px;
-      background: #020617;
-      color: gold;
-    }
-  </style>
+<body>
+  <div id="content">Checking access...</div>
 
   <script>
     const token = localStorage.getItem("dragonToken");
 
-    if (token !== "dragon_access_granted") {
+    if (!token) {
       window.location.href = "index.html";
-    } else {
-      document.addEventListener("DOMContentLoaded", () => {
-        document.body.style.display = "block";
-      });
     }
-  </script>
-</head>
 
-<body>
-  <h1>🏆 The Dragon’s Treasure</h1>
-  <p>You have proven worthy.</p>
+    fetch("https://your-function-url/verify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": "YOUR_KEY",
+        "Authorization": "Bearer YOUR_KEY"
+      },
+      body: JSON.stringify({ token })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.valid) {
+        document.getElementById("content").innerHTML =
+          "<h1>🏆 Treasure Unlocked</h1>";
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+  </script>
 </body>
-</html>
