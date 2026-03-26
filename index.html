@@ -1,3 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>🐉 Dragon Vault</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      margin-top: 80px;
+      background: #0f172a;
+      color: white;
+    }
+    input {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 15px;
+      background: #3b82f6;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🐉 Enter the 6 A.A.A. Dragon Seals</h1>
+
+<input id="code1" placeholder="Seal 1">
+<input id="code2" placeholder="Seal 2">
+<input id="code3" placeholder="Seal 3">
+<input id="code4" placeholder="Seal 4">
+<input id="code5" placeholder="Seal 5">
+<input id="code6" placeholder="Seal 6">
+
+<button onclick="checkCodes()">Unlock</button>
+
+<p id="result"></p>
+
 <script>
 async function checkCodes() {
   const resultEl = document.getElementById("result");
@@ -58,3 +103,6 @@ async function checkCodes() {
   }
 }
 </script>
+
+</body>
+</html>
