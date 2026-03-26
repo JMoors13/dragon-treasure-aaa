@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>🐉 Dragon Treasure</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      margin-top: 100px;
+      background: #020617;
+      color: gold;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🏆 The Dragon’s Treasure</h1>
+<p>You have proven worthy. The hoard is yours.</p>
+
+<script>
+  if (localStorage.getItem("dragonUnlocked") !== "true") {
+    // If not unlocked, kick them out
+    window.location.href = "index.html";
+  }
+</script>
+
+</body>
+</html>
