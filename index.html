@@ -1,22 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>🐉 Dragon Treasure AAA</title>
+  <title>🐉 Dragon Vault</title>
   <style>
     body {
       font-family: Arial;
       text-align: center;
-      margin-top: 100px;
+      margin-top: 80px;
       background: #0f172a;
       color: white;
     }
     input {
       padding: 10px;
+      margin: 5px;
       font-size: 16px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
     button {
       padding: 10px 20px;
-      margin-left: 10px;
+      margin-top: 15px;
       background: #3b82f6;
       border: none;
       color: white;
@@ -26,29 +30,63 @@
 </head>
 <body>
 
-<h1>🐉 Enter the Dragon Code</h1>
+<h1>🐉 Enter the 6 Dragon Seals</h1>
 
-<input id="codeInput" placeholder="Enter secret..." />
-<button onclick="checkCode()">Submit</button>
+<input id="code1" placeholder="Seal 1">
+<input id="code2" placeholder="Seal 2">
+<input id="code3" placeholder="Seal 3">
+<input id="code4" placeholder="Seal 4">
+<input id="code5" placeholder="Seal 5">
+<input id="code6" placeholder="Seal 6">
+
+<button onclick="checkCodes()">Unlock</button>
 
 <p id="result"></p>
 
 <script>
-function checkCode() {
-  const input = document.getElementById("codeInput").value;
+function checkCodes() {
+  const inputs = [
+    document.getElementById("code1").value.trim().toLowerCase(),
+    document.getElementById("code2").value.trim().toLowerCase(),
+    document.getElementById("code3").value.trim().toLowerCase(),
+    document.getElementById("code4").value.trim().toLowerCase(),
+    document.getElementById("code5").value.trim().toLowerCase(),
+    document.getElementById("code6").value.trim().toLowerCase()
+  ];
+
+  const correct = [
+    "fire",
+    "scale",
+    "gold",
+    "wing",
+    "claw",
+    "ember"
+  ];
+
   const result = document.getElementById("result");
 
-  if (input === "aaa_dragon_master") {
-    result.innerHTML = "🔥 Correct! The dragon awakens... 🐉";
+  let allCorrect = true;
+
+  for (let i = 0; i < correct.length; i++) {
+    if (inputs[i] !== correct[i]) {
+      allCorrect = false;
+      break;
+    }
+  }
+
+  if (allCorrect) {
+    result.innerHTML = "🔥 All seals aligned... the vault opens!";
     result.style.color = "lime";
 
-    // 👉 NEW: redirect after success
+    // Save unlock state
+    localStorage.setItem("dragonUnlocked", "true");
+
     setTimeout(() => {
-      window.location.href = "final.html";
-    }, 2000);
+      window.location.href = "locked.html";
+    }, 1500);
 
   } else {
-    result.innerHTML = "❌ Incorrect. Try again.";
+    result.innerHTML = "❌ The seals reject you...";
     result.style.color = "red";
   }
 }
