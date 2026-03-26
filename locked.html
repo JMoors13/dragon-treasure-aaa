@@ -1,42 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>🐉 Dragon Treasure</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      margin-top: 80px;
+      background: #0f172a;
+      color: white;
+    }
+
+    #content {
+      font-size: 20px;
+      margin-top: 30px;
+    }
+
+    .success {
+      color: lime;
+      font-size: 28px;
+    }
+  </style>
+</head>
+
 <body>
+
+  <h1>🐉 Verifying Access...</h1>
   <div id="content">Checking access...</div>
 
   <script>
     const token = localStorage.getItem("dragonToken");
     const time = localStorage.getItem("dragonTime");
-    
-    // ⏳ Set timeout (in milliseconds)
-    const EXPIRY = 10 * 1000; // 10 seconds 
-    
+
+    const EXPIRY = 10 * 1000; // ⏱️ 10 seconds
+
+    // 🚫 Block immediately if invalid/expired
     if (!token || !time || (Date.now() - time > EXPIRY)) {
-      // clear old session
       localStorage.removeItem("dragonToken");
       localStorage.removeItem("dragonTime");
-    
-      // kick out
       window.location.href = "index.html";
-    }
-    if (!token) {
-      window.location.href = "index.html";
-    }
+    } else {
 
-    fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg"
-      },
-      body: JSON.stringify({ token })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.valid) {
-        document.getElementById("content").innerHTML =
-          "<h1>🏆 Treasure Unlocked</h1>";
-      } else {
+      // 🔐 Verify with backend
+      fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": "YOUR_ANON_KEY",
+          "Authorization": "Bearer YOUR_ANON_KEY"
+        },
+        body: JSON.stringify({ token })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.valid) {
+          document.getElementById("content").innerHTML =
+            "<div class='success'>🏆 Treasure Unlocked</div>";
+        } else {
+          window.location.href = "index.html";
+        }
+      })
+      .catch(() => {
+        // fallback if request fails
         window.location.href = "index.html";
-      }
-    });
+      });
+    }
   </script>
+
 </body>
+</html>
