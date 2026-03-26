@@ -33,7 +33,7 @@
     const token = localStorage.getItem("dragonToken");
     const time = localStorage.getItem("dragonTime");
 
-    const EXPIRY = 10 * 1000; // ⏱️ 10 seconds
+    const EXPIRY = 30 * 1000; // ⏱️ 10 seconds
 
     // 🚫 Block immediately if invalid/expired
     if (!token || !time || (Date.now() - time > EXPIRY)) {
