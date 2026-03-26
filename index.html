@@ -44,50 +44,31 @@
 <p id="result"></p>
 
 <script>
-function checkCodes() {
+async function checkCodes() {
   const inputs = [
-    document.getElementById("code1").value.trim().toLowerCase(),
-    document.getElementById("code2").value.trim().toLowerCase(),
-    document.getElementById("code3").value.trim().toLowerCase(),
-    document.getElementById("code4").value.trim().toLowerCase(),
-    document.getElementById("code5").value.trim().toLowerCase(),
-    document.getElementById("code6").value.trim().toLowerCase()
+    document.getElementById("code1").value,
+    document.getElementById("code2").value,
+    document.getElementById("code3").value,
+    document.getElementById("code4").value,
+    document.getElementById("code5").value,
+    document.getElementById("code6").value
   ];
 
-  const correct = [
-    "fire",
-    "scale",
-    "gold",
-    "wing",
-    "claw",
-    "ember"
-  ];
+  const res = await fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ inputs })
+  });
 
-  const result = document.getElementById("result");
+  const data = await res.json();
 
-  let allCorrect = true;
-
-  for (let i = 0; i < correct.length; i++) {
-    if (inputs[i] !== correct[i]) {
-      allCorrect = false;
-      break;
-    }
-  }
-
-  if (allCorrect) {
-    result.innerHTML = "🔥 All seals aligned... the vault opens!";
-    result.style.color = "lime";
-
-    // Save unlock state
+  if (data.success) {
     localStorage.setItem("dragonUnlocked", "true");
-
-    setTimeout(() => {
-      window.location.href = "locked.html";
-    }, 1500);
-
+    window.location.href = "locked.html";
   } else {
-    result.innerHTML = "❌ The seals reject you...";
-    result.style.color = "red";
+    document.getElementById("result").innerText = "❌ The vault stays sealed...";
   }
 }
 </script>
