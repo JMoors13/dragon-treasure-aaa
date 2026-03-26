@@ -1,60 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>🐉 Dragon Vault</title>
-  <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      margin-top: 80px;
-      background: #0f172a;
-      color: white;
-    }
-    input {
-      padding: 10px;
-      margin: 5px;
-      font-size: 16px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    button {
-      padding: 10px 20px;
-      margin-top: 15px;
-      background: #3b82f6;
-      border: none;
-      color: white;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-
-<h1>🐉 Enter the 6 A.A.A. Dragon Seals</h1>
-
-<input id="code1" placeholder="Seal 1">
-<input id="code2" placeholder="Seal 2">
-<input id="code3" placeholder="Seal 3">
-<input id="code4" placeholder="Seal 4">
-<input id="code5" placeholder="Seal 5">
-<input id="code6" placeholder="Seal 6">
-
-<button onclick="checkCodes()">Unlock</button>
-
-<p id="result"></p>
-
 <script>
 async function checkCodes() {
+  const resultEl = document.getElementById("result");
+  const button = document.querySelector("button");
+  button.disabled = true;
+
   const inputs = [
-    document.getElementById("code1").value,
-    document.getElementById("code2").value,
-    document.getElementById("code3").value,
-    document.getElementById("code4").value,
-    document.getElementById("code5").value,
-    document.getElementById("code6").value
+    code1.value,
+    code2.value,
+    code3.value,
+    code4.value,
+    code5.value,
+    code6.value
   ];
 
-  const res = await fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
+  // 🐉 Start backend request immediately
+  const fetchPromise = fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -62,19 +22,39 @@ async function checkCodes() {
       "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg"
     },
     body: JSON.stringify({ inputs })
-  });
+  }).then(res => res.json());
 
-  const data = await res.json();
+  // 🎬 Show messages while request runs
+  const messages = [
+    "🔐 Trying to pick the lock...",
+    "🗝️ Jiggling the keys...",
+    "🪨 Throwing a rock at it..."
+  ];
 
+  for (let i = 0; i < messages.length; i++) {
+    resultEl.innerText = messages[i];
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  }
+
+  // ⏳ Wait for backend result (if not already finished)
+  const data = await fetchPromise;
+
+  // 🎯 Show result
   if (data.success) {
+    resultEl.innerText = "🔥 Success! The vault cracks open...";
+    resultEl.style.color = "lime";
+
     localStorage.setItem("dragonToken", data.token);
     localStorage.setItem("dragonTime", Date.now());
-    window.location.href = "locked.html";
+
+    setTimeout(() => {
+      window.location.href = "locked.html";
+    }, 1500);
+
   } else {
-    document.getElementById("result").innerText = "❌ The vault stays sealed...";
+    resultEl.innerText = "❌ The vault stays sealed...";
+    resultEl.style.color = "red";
+    button.disabled = false;
   }
 }
 </script>
-
-</body>
-</html>
