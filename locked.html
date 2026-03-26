@@ -2,17 +2,10 @@
 <html>
 <head>
   <title>🐉 Dragon Treasure</title>
-  
-  <script>
-  const token = localStorage.getItem("dragonToken");
-  
-  if (token !== "dragon_access_granted") {
-    window.location.href = "index.html";
-  }
-  </script>
-  
+
   <style>
     body {
+      display: none;
       font-family: Arial;
       text-align: center;
       margin-top: 100px;
@@ -20,18 +13,22 @@
       color: gold;
     }
   </style>
+
+  <script>
+    const token = localStorage.getItem("dragonToken");
+
+    if (token !== "dragon_access_granted") {
+      window.location.href = "index.html";
+    } else {
+      document.addEventListener("DOMContentLoaded", () => {
+        document.body.style.display = "block";
+      });
+    }
+  </script>
 </head>
+
 <body>
-
-<h1>🏆 The Dragon’s Treasure</h1>
-<p>You have proven worthy. The hoard is yours.</p>
-
-<script>
-  if (localStorage.getItem("dragonUnlocked") !== "true") {
-    // If not unlocked, kick them out
-    window.location.href = "index.html";
-  }
-</script>
-
+  <h1>🏆 The Dragon’s Treasure</h1>
+  <p>You have proven worthy.</p>
 </body>
 </html>
