@@ -39,8 +39,14 @@ function checkCode() {
   const result = document.getElementById("result");
 
   if (input === "aaa_dragon_master") {
-    result.innerHTML = "🔥 Correct! The dragon awakens...";
+    result.innerHTML = "🔥 Correct! The dragon awakens... 🐉";
     result.style.color = "lime";
+
+    // 👉 NEW: redirect after success
+    setTimeout(() => {
+      window.location.href = "final.html";
+    }, 2000);
+
   } else {
     result.innerHTML = "❌ Incorrect. Try again.";
     result.style.color = "red";
