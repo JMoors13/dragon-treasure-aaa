@@ -38,8 +38,8 @@
     // 🚫 Block immediately if invalid/expired
     if (!token || !time || (Date.now() - time > EXPIRY)) {
       localStorage.removeItem("dragonToken");
-      localStorage.removeItem("dragonTime");
-      window.location.href = "index.html";
+      // localStorage.removeItem("dragonTime");
+      // window.location.href = "index.html";
     } else {
 
       // 🔐 Verify with backend
