@@ -3,7 +3,19 @@
 
   <script>
     const token = localStorage.getItem("dragonToken");
-
+    const time = localStorage.getItem("dragonTime");
+    
+    // ⏳ Set timeout (in milliseconds)
+    const EXPIRY = 2 * 60 * 1000; // 2 minutes (change as you like)
+    
+    if (!token || !time || (Date.now() - time > EXPIRY)) {
+      // clear old session
+      localStorage.removeItem("dragonToken");
+      localStorage.removeItem("dragonTime");
+    
+      // kick out
+      window.location.href = "index.html";
+    }
     if (!token) {
       window.location.href = "index.html";
     }
