@@ -45,6 +45,17 @@
 
 <script>
 async function checkCodes() {
+  const lastAttempt = localStorage.getItem("lastAttempt");
+  const now = Date.now();
+
+  if (lastAttempt && now - lastAttempt < 5000) {
+    resultEl.innerText = "⏳ Slow down, the dragon is watching...";
+    resultEl.style.color = "yellow";
+    return;
+  }
+
+  localStorage.setItem("lastAttempt", now);
+  
   const resultEl = document.getElementById("result");
   const button = document.querySelector("button");
   button.disabled = true;
@@ -88,17 +99,17 @@ async function checkCodes() {
   if (data.success) {
     resultEl.innerText = "🔥 Success! The vault cracks open...";
     resultEl.style.color = "lime";
-
+  
     localStorage.setItem("dragonToken", data.token);
     localStorage.setItem("dragonTime", Date.now());
-
+  
     setTimeout(() => {
       window.location.href = "locked.html";
     }, 1500);
-
+  
   } else {
-    resultEl.innerText = "❌ The vault stays sealed...";
-    resultEl.style.color = "red";
+    resultEl.innerText = `❌ ${data.correctCount}/6 seals correct`;
+    resultEl.style.color = "orange";
     button.disabled = false;
   }
 }
