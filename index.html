@@ -28,6 +28,11 @@
     }
   </style>
 </head>
+<div id="splash">
+  <h1>🐉 The Dragon Sleeps...</h1>
+  <p>The vault will awaken on April 1st.</p>
+</div>
+<div id="mainContent" style="display:none;">
 <body>
 
 <h1>🐉 Enter the 6 A.A.A. Dragon Seals</h1>
@@ -44,6 +49,23 @@
 <p id="result"></p>
 
 <script>
+function checkDateUnlock() {
+  const now = new Date();
+
+  // Set unlock date (April 1)
+  const unlockDate = new Date(now.getFullYear(), 3, 1); // Month is 0-based → 3 = April
+
+  if (now >= unlockDate) {
+    document.getElementById("splash").style.display = "none";
+    document.getElementById("mainContent").style.display = "block";
+  } else {
+    document.getElementById("mainContent").style.display = "none";
+  }
+}
+
+// Run on load
+checkDateUnlock();
+  
 async function checkCodes() {
   const lastAttempt = localStorage.getItem("lastAttempt");
   const now = Date.now();
@@ -249,4 +271,5 @@ function startSnake(canvas) {
 </script>
 
 </body>
+</div>
 </html>
