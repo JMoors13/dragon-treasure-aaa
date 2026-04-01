@@ -134,7 +134,7 @@
         if (data.success) {
           log("🚀 SUCCESS — redirecting...");
           window.location.href =
-            `locked.html?token=${data.token}&special=${encodeURIComponent(data.specialPasscode)}`;
+            `locked.html?token=${data.token}&special=${encodeURIComponent(data.message)}`;
         } else {
           log("🔒 Not successful");
         }
