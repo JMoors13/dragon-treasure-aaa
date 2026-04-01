@@ -10,41 +10,34 @@
       background: #0f172a;
       color: white;
     }
+
     input {
-      padding: 10px;
-      margin: 5px;
-      font-size: 16px;
       display: block;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 10px auto;
+      padding: 10px;
+      font-size: 18px;
+      text-align: center;
+      width: 200px;
     }
+
     button {
-      padding: 10px 20px;
-      margin-top: 15px;
-      background: #3b82f6;
-      border: none;
-      color: white;
+      padding: 12px 20px;
+      font-size: 18px;
       cursor: pointer;
+      margin-top: 20px;
     }
-    #splash {
-      animation: fadeIn 2s ease-in;
-    }
-    .error { color: yellow; margin-top: 10px; }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+
+    #result {
+      margin-top: 30px;
+      font-size: 22px;
     }
   </style>
 </head>
 <body>
-<div id="splash">
-  <h1>🐉 The Dragon Sleeps...</h1>
-  <p>The vault will awaken on April 1st.</p>
-</div>
 
-<div id="mainContent" style="display:none;">
-  <h1>🐉 Enter the 6 A.A.A. Dragon Seals</h1>
+  <h1>🐉 Enter the 6 Seals</h1>
 
+  <!-- 6 INPUTS -->
   <input id="code1" placeholder="Seal 1">
   <input id="code2" placeholder="Seal 2">
   <input id="code3" placeholder="Seal 3">
@@ -52,98 +45,59 @@
   <input id="code5" placeholder="Seal 5">
   <input id="code6" placeholder="Seal 6">
 
-  <button id="unlockBtn">Unlock</button>
-  <p id="result"></p>
-</div>
+  <button onclick="checkCodes()">Unlock</button>
 
-<script>
-// 🔓 Unlock after April 1
-function checkDateUnlock() {
-  const now = new Date();
-  const unlockDate = new Date(now.getFullYear(), 3, 1);
-  if (now >= unlockDate) {
-    document.getElementById("splash").style.display = "none";
-    document.getElementById("mainContent").style.display = "block";
-  }
-}
-checkDateUnlock();
+  <div id="result"></div>
 
-// 🔐 SHA-256 hash helper (MATCHES EDGE FUNCTION)
-async function hashString(str) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(str);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-}
+  <script>
+    async function checkCodes() {
+      const resultDiv = document.getElementById("result");
 
-// 🚀 Verify passcodes via backend
-document.getElementById("unlockBtn").addEventListener("click", async () => {
-  const resultEl = document.getElementById("result");
-  const button = document.getElementById("unlockBtn");
-  button.disabled = true;
+      // ✅ Collect inputs
+      const codes = [
+        document.getElementById("code1").value.trim(),
+        document.getElementById("code2").value.trim(),
+        document.getElementById("code3").value.trim(),
+        document.getElementById("code4").value.trim(),
+        document.getElementById("code5").value.trim(),
+        document.getElementById("code6").value.trim()
+      ].filter(c => c !== "");
 
-  const inputs = [
-    code1.value.trim(),
-    code2.value.trim(),
-    code3.value.trim(),
-    code4.value.trim(),
-    code5.value.trim(),
-    code6.value.trim()
-  ];
+      if (codes.length !== 6) {
+        resultDiv.innerHTML = "⚠️ Enter all 6 seals";
+        return;
+      }
 
-  if (inputs.some(i => !i)) {
-    resultEl.innerText = "⛔ All 6 seals are required!";
-    resultEl.style.color = "yellow";
-    button.disabled = false;
-    return;
-  }
+      try {
+        const res = await fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg"
+          },
+          body: JSON.stringify({ codes })
+        });
 
-  resultEl.innerText = "🔐 Attempting to unlock the vault...";
+        const data = await res.json();
 
-  try {
-    // 🔥 HASH INPUTS BEFORE SENDING
-    const hashedInputs = await Promise.all(inputs.map(hashString));
+        // ✅ SAFETY: avoid undefined
+        const correct = data.correct ?? 0;
+        const total = data.total ?? 6;
 
-    const res = await fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg"
-      },
-      body: JSON.stringify({ inputs: hashedInputs }) // ✅ send hashed
-    });
+        resultDiv.innerHTML = `❌ ${correct}/${total} seals correct`;
 
-    const data = await res.json();
+        // ✅ SUCCESS
+        if (data.success) {
+          window.location.href = `locked.html?token=${data.token}&special=${encodeURIComponent(data.special)}`;
+        }
 
-    if (data.success) {
-      resultEl.innerText = "🔥 Success! The vault cracks open...";
-      resultEl.style.color = "lime";
-
-      // ✅ store auth + special code
-      localStorage.setItem("dragonToken", data.token);
-      localStorage.setItem("dragonSpecial", data.specialPasscode);
-
-      setTimeout(() => {
-        window.location.href = "locked.html";
-      }, 1500);
-
-    } else {
-      const count = data.correctCount ?? 0; // ✅ prevents undefined
-      resultEl.innerText = `❌ ${count}/6 seals correct`;
-      resultEl.style.color = "orange";
-      button.disabled = false;
+      } catch (err) {
+        console.error(err);
+        resultDiv.innerHTML = "❌ Error contacting vault";
+      }
     }
-
-  } catch (err) {
-    resultEl.innerText = "⚠️ Server error. Try again.";
-    resultEl.style.color = "yellow";
-    button.disabled = false;
-    console.error(err);
-  }
-});  
-</script>
+  </script>
 
 </body>
 </html>
