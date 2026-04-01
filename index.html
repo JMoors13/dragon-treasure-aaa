@@ -126,7 +126,7 @@
         log("✅ Parsed response:");
         log(JSON.stringify(data, null, 2));
 
-        const correct = data.correct ?? 0;
+        const correct = data.correctCount ?? 0;
         const total = data.total ?? 6;
 
         resultDiv.innerHTML = `❌ ${correct}/${total} seals correct`;
