@@ -36,8 +36,8 @@
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("token");
-    const specialPasscode = urlParams.get("special");
-
+    const message = urlParams.get("msg");
+    
     if (!token || !specialPasscode) {
       window.location.href = "index.html";
     } else {
