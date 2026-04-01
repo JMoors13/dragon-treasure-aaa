@@ -21,6 +21,12 @@
       color: lime;
       font-size: 28px;
     }
+
+    .special {
+      color: gold;
+      font-size: 24px;
+      margin-top: 20px;
+    }
   </style>
 </head>
 
@@ -32,8 +38,7 @@
   <script>
     const token = localStorage.getItem("dragonToken");
     const time = Number(localStorage.getItem("dragonTime"));
-    
-    const EXPIRY = 30 * 1000; // ⏱️ 10 seconds
+    const EXPIRY = 30 * 1000; // ⏱️ 30 seconds
 
     // 🚫 Block immediately if invalid/expired
     if (!token || !time || (Date.now() - time > EXPIRY)) {
@@ -42,13 +47,13 @@
       window.location.href = "index.html";
     } else {
 
-      // 🔐 Verify with backend
+      // 🔐 Verify token and get special passcode
       fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg"
+          "apikey": "YOUR_SUPABASE_ANON_KEY",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({ token })
       })
@@ -57,6 +62,15 @@
         if (data.valid) {
           document.getElementById("content").innerHTML =
             "<div class='success'>🏆 You have unlocked the 6 seals of the Dragon Vault!</div>";
+
+          // ✅ Display the special passcode if available
+          if (data.specialPasscode) {
+            const specialEl = document.createElement("div");
+            specialEl.className = "special";
+            specialEl.textContent = `🎉 Special Passcode: ${data.specialPasscode}`;
+            document.body.appendChild(specialEl);
+          }
+
         } else {
           window.location.href = "index.html";
         }
@@ -65,6 +79,7 @@
         // fallback if request fails
         window.location.href = "index.html";
       });
+
     }
   </script>
 
