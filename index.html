@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>🐉 Dragon Vault</title>
+  <title>🐉 Dragon Vault (Debug)</title>
   <style>
     body {
       font-family: Arial;
       text-align: center;
-      margin-top: 80px;
+      margin-top: 60px;
       background: #0f172a;
       color: white;
     }
@@ -17,7 +17,7 @@
       padding: 10px;
       font-size: 18px;
       text-align: center;
-      width: 200px;
+      width: 220px;
     }
 
     button {
@@ -28,16 +28,29 @@
     }
 
     #result {
-      margin-top: 30px;
+      margin-top: 20px;
       font-size: 22px;
+    }
+
+    #debug {
+      margin-top: 30px;
+      text-align: left;
+      background: #020617;
+      padding: 15px;
+      border-radius: 10px;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 14px;
+      white-space: pre-wrap;
+      overflow-x: auto;
     }
   </style>
 </head>
 <body>
 
-  <h1>🐉 Enter the 6 Seals</h1>
+  <h1>🐉 Enter the 6 Seals (DEBUG)</h1>
 
-  <!-- 6 INPUTS -->
   <input id="code1" placeholder="Seal 1">
   <input id="code2" placeholder="Seal 2">
   <input id="code3" placeholder="Seal 3">
@@ -49,11 +62,19 @@
 
   <div id="result"></div>
 
+  <div id="debug">Debug log:\n</div>
+
   <script>
+    function log(msg) {
+      const debug = document.getElementById("debug");
+      debug.textContent += msg + "\n";
+      console.log(msg);
+    }
+
     async function checkCodes() {
       const resultDiv = document.getElementById("result");
+      document.getElementById("debug").textContent = "Debug log:\n";
 
-      // ✅ Collect inputs
       const codes = [
         document.getElementById("code1").value.trim(),
         document.getElementById("code2").value.trim(),
@@ -61,14 +82,22 @@
         document.getElementById("code4").value.trim(),
         document.getElementById("code5").value.trim(),
         document.getElementById("code6").value.trim()
-      ].filter(c => c !== "");
+      ];
 
-      if (codes.length !== 6) {
+      log("📥 Raw input codes:");
+      log(JSON.stringify(codes, null, 2));
+
+      const filteredCodes = codes.filter(c => c !== "");
+
+      if (filteredCodes.length !== 6) {
         resultDiv.innerHTML = "⚠️ Enter all 6 seals";
+        log("❌ Not all inputs filled");
         return;
       }
 
       try {
+        log("📡 Sending request to Edge Function...");
+
         const res = await fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
           method: "POST",
           headers: {
@@ -76,25 +105,44 @@
             "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg",
             "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg"
           },
-          body: JSON.stringify({ codes })
+          body: JSON.stringify({ codes: filteredCodes })
         });
 
-        const data = await res.json();
+        log(`📬 Response status: ${res.status}`);
 
-        // ✅ SAFETY: avoid undefined
+        const text = await res.text();
+        log("📦 Raw response:");
+        log(text);
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          log("❌ Failed to parse JSON");
+          resultDiv.innerHTML = "❌ Invalid server response";
+          return;
+        }
+
+        log("✅ Parsed response:");
+        log(JSON.stringify(data, null, 2));
+
         const correct = data.correct ?? 0;
         const total = data.total ?? 6;
 
         resultDiv.innerHTML = `❌ ${correct}/${total} seals correct`;
 
-        // ✅ SUCCESS
         if (data.success) {
-          window.location.href = `locked.html?token=${data.token}&special=${encodeURIComponent(data.special)}`;
+          log("🚀 SUCCESS — redirecting...");
+          window.location.href =
+            `locked.html?token=${data.token}&special=${encodeURIComponent(data.special)}`;
+        } else {
+          log("🔒 Not successful");
         }
 
       } catch (err) {
-        console.error(err);
-        resultDiv.innerHTML = "❌ Error contacting vault";
+        log("🔥 FETCH ERROR:");
+        log(err.toString());
+        resultDiv.innerHTML = "❌ Network error";
       }
     }
   </script>
