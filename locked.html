@@ -2,84 +2,44 @@
 <html>
 <head>
   <title>🐉 Dragon Treasure</title>
-
   <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      margin-top: 80px;
-      background: #0f172a;
-      color: white;
-    }
-
-    #content {
-      font-size: 20px;
-      margin-top: 30px;
-    }
-
-    .success {
-      color: lime;
-      font-size: 28px;
-    }
-
-    .special {
-      color: gold;
-      font-size: 24px;
-      margin-top: 20px;
-    }
+    body { font-family: Arial; text-align: center; margin-top: 80px; background: #0f172a; color: white; }
+    #content { font-size: 20px; margin-top: 30px; }
+    .success { color: lime; font-size: 28px; }
+    .special { color: gold; font-size: 24px; margin-top: 20px; }
   </style>
 </head>
-
 <body>
 
-  <h1>🐉 Verifying Access...</h1>
-  <div id="content">Checking access...</div>
+  <h1>🐉 Dragon Vault</h1>
+  <div id="content">Verifying access...</div>
 
   <script>
-    const token = localStorage.getItem("dragonToken");
-    const time = Number(localStorage.getItem("dragonTime"));
-    const EXPIRY = 30 * 1000; // ⏱️ 30 seconds
+    // ✅ Read token & special passcode from URL query
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+    const specialPasscode = urlParams.get("special");
 
-    // 🚫 Block immediately if invalid/expired
-    if (!token || !time || (Date.now() - time > EXPIRY)) {
-      localStorage.removeItem("dragonToken");
-      localStorage.removeItem("dragonTime");
+    if (!token || !specialPasscode) {
       window.location.href = "index.html";
     } else {
-
-      // 🔐 Verify token and get special passcode
+      // 🔐 Optional: verify token with backend
       fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg",
-          "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg`
-        },
+        headers: { "Content-Type": "application/json", "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg" },
         body: JSON.stringify({ token })
       })
       .then(res => res.json())
       .then(data => {
         if (data.valid) {
           document.getElementById("content").innerHTML =
-            "<div class='success'>🏆 You have unlocked the 6 seals of the Dragon Vault!</div>";
-
-          // ✅ Display the special passcode if available
-          if (data.specialPasscode) {
-            const specialEl = document.createElement("div");
-            specialEl.className = "special";
-            specialEl.textContent = `🎉 Special Passcode: ${data.specialPasscode}`;
-            document.body.appendChild(specialEl);
-          }
-
+            `<div class='success'>🏆 You have unlocked the 6 seals of the Dragon Vault!</div>
+             <div class='special'>🎉 Special Passcode: ${specialPasscode}</div>`;
         } else {
           window.location.href = "index.html";
         }
       })
-      .catch(() => {
-        // fallback if request fails
-        window.location.href = "index.html";
-      });
-
+      .catch(() => window.location.href = "index.html");
     }
   </script>
 
