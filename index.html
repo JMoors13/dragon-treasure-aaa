@@ -73,7 +73,7 @@
 
     async function checkCodes() {
       const resultDiv = document.getElementById("result");
-      document.getElementById("debug").textContent = "Debug log:\n";
+//      document.getElementById("debug").textContent = "Debug log:\n";
 
       const codes = [
         document.getElementById("code1").value.trim(),
@@ -84,7 +84,7 @@
         document.getElementById("code6").value.trim()
       ];
 
-      log("📥 Raw input codes:");
+      // log("📥 Raw input codes:");
       log(JSON.stringify(codes, null, 2));
 
       const filteredCodes = codes.filter(c => c !== "");
