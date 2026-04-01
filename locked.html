@@ -38,13 +38,13 @@
     const token = urlParams.get("token");
     const message = urlParams.get("msg");
     
-    if (!token || !specialPasscode) {
+    if (!token || !message) {
       window.location.href = "index.html";
     } else {
       // ✅ TRUST BACKEND RESULT
       document.getElementById("content").innerHTML =
         `<div class='success'>🏆 You have unlocked the 6 seals of the Dragon Vault!</div>
-         <div class='special'>🎉 Special Passcode: ${specialPasscode}</div>`;
+         <div class='special'>🎉 Special Passcode: ${message}</div>`;
     }
   </script>
 
