@@ -68,6 +68,15 @@ function checkDateUnlock() {
 }
 checkDateUnlock();
 
+// 🔐 SHA-256 hash helper (MATCHES EDGE FUNCTION)
+async function hashString(str) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 // 🚀 Verify passcodes via backend
 document.getElementById("unlockBtn").addEventListener("click", async () => {
   const resultEl = document.getElementById("result");
@@ -93,6 +102,9 @@ document.getElementById("unlockBtn").addEventListener("click", async () => {
   resultEl.innerText = "🔐 Attempting to unlock the vault...";
 
   try {
+    // 🔥 HASH INPUTS BEFORE SENDING
+    const hashedInputs = await Promise.all(inputs.map(hashString));
+
     const res = await fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
       method: "POST",
       headers: {
@@ -100,23 +112,26 @@ document.getElementById("unlockBtn").addEventListener("click", async () => {
         "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg"
       },
-      body: JSON.stringify({ inputs })
+      body: JSON.stringify({ inputs: hashedInputs }) // ✅ send hashed
     });
+
     const data = await res.json();
 
     if (data.success) {
       resultEl.innerText = "🔥 Success! The vault cracks open...";
       resultEl.style.color = "lime";
 
-      // ✅ Redirect to locked.html with token & special passcode
-      const params = new URLSearchParams();
-      params.set("token", data.token);
-      params.set("special", data.specialPasscode);
+      // ✅ store auth + special code
+      localStorage.setItem("dragonToken", data.token);
+      localStorage.setItem("dragonSpecial", data.specialPasscode);
+
       setTimeout(() => {
-        window.location.href = `locked.html?${params.toString()}`;
+        window.location.href = "locked.html";
       }, 1500);
+
     } else {
-      resultEl.innerText = `❌ ${data.correctCount}/6 seals correct`;
+      const count = data.correctCount ?? 0; // ✅ prevents undefined
+      resultEl.innerText = `❌ ${count}/6 seals correct`;
       resultEl.style.color = "orange";
       button.disabled = false;
     }
@@ -125,107 +140,8 @@ document.getElementById("unlockBtn").addEventListener("click", async () => {
     resultEl.innerText = "⚠️ Server error. Try again.";
     resultEl.style.color = "yellow";
     button.disabled = false;
+    console.error(err);
   }
 });
-
-// 🐍 Snake Game (Konami code)
-const konamiCode = [
-  "ArrowUp","ArrowUp","ArrowDown","ArrowDown",
-  "ArrowLeft","ArrowRight","ArrowLeft","ArrowRight",
-  "b","a"
-];
-let konamiIndex = 0;
-document.addEventListener("keydown", (e) => {
-  if (e.key === konamiCode[konamiIndex]) {
-    konamiIndex++;
-    if (konamiIndex === konamiCode.length) {
-      launchSnakeGame();
-      konamiIndex = 0;
-    }
-  } else konamiIndex = 0;
-});
-
-function launchSnakeGame() {
-  const overlay = document.createElement("div");
-  overlay.style.position = "fixed";
-  overlay.style.top = 0;
-  overlay.style.left = 0;
-  overlay.style.width = "100%";
-  overlay.style.height = "100%";
-  overlay.style.background = "#000";
-  overlay.style.display = "flex";
-  overlay.style.flexDirection = "column";
-  overlay.style.alignItems = "center";
-  overlay.style.justifyContent = "center";
-  overlay.style.zIndex = 9999;
-
-  const title = document.createElement("h1");
-  title.innerText = "🐍 Snake Unlocked!";
-  title.style.color = "lime";
-  overlay.appendChild(title);
-
-  const canvas = document.createElement("canvas");
-  canvas.width = 400;
-  canvas.height = 400;
-  canvas.style.border = "2px solid lime";
-  overlay.appendChild(canvas);
-
-  const exitBtn = document.createElement("button");
-  exitBtn.innerText = "Exit Game";
-  exitBtn.style.marginTop = "10px";
-  exitBtn.onclick = () => document.body.removeChild(overlay);
-  overlay.appendChild(exitBtn);
-
-  document.body.appendChild(overlay);
-  startSnake(canvas);
-}
-
-function startSnake(canvas) {
-  const ctx = canvas.getContext("2d");
-  const grid = 20;
-  let snake = [{ x: 200, y: 200 }];
-  let dx = grid, dy = 0;
-  let food = { x: Math.floor(Math.random()*20)*grid, y: Math.floor(Math.random()*20)*grid };
-  let count = 0;
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft" && dx === 0) { dx = -grid; dy = 0; }
-    if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -grid; }
-    if (e.key === "ArrowRight" && dx === 0) { dx = grid; dy = 0; }
-    if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = grid; }
-  });
-
-  function loop() {
-    requestAnimationFrame(loop);
-    if (++count < 6) return;
-    count = 0;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-    head.x = (head.x + canvas.width) % canvas.width;
-    head.y = (head.y + canvas.height) % canvas.height;
-    snake.unshift(head);
-
-    if (head.x === food.x && head.y === food.y) {
-      food = { x: Math.floor(Math.random()*20)*grid, y: Math.floor(Math.random()*20)*grid };
-    } else snake.pop();
-
-    ctx.fillStyle = "red";
-    ctx.fillRect(food.x, food.y, grid-1, grid-1);
-
-    ctx.fillStyle = "lime";
-    snake.forEach(s => ctx.fillRect(s.x, s.y, grid-1, grid-1));
-
-    for (let i = 1; i < snake.length; i++) {
-      if (head.x === snake[i].x && head.y === snake[i].y) {
-        snake = [{ x: 200, y: 200 }]; dx = grid; dy = 0;
-      }
-    }
-  }
-
-  loop();
-}
-</script>
 </body>
 </html>
