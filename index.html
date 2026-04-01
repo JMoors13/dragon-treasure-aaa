@@ -29,145 +29,122 @@
     #splash {
       animation: fadeIn 2s ease-in;
     }
-    
+    .error { color: yellow; margin-top: 10px; }
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
   </style>
 </head>
+<body>
 <div id="splash">
   <h1>🐉 The Dragon Sleeps...</h1>
   <p>The vault will awaken on April 1st.</p>
 </div>
+
 <div id="mainContent" style="display:none;">
-<body>
+  <h1>🐉 Enter the 6 A.A.A. Dragon Seals</h1>
 
-<h1>🐉 Enter the 6 A.A.A. Dragon Seals</h1>
+  <input id="code1" placeholder="Seal 1">
+  <input id="code2" placeholder="Seal 2">
+  <input id="code3" placeholder="Seal 3">
+  <input id="code4" placeholder="Seal 4">
+  <input id="code5" placeholder="Seal 5">
+  <input id="code6" placeholder="Seal 6">
 
-<input id="code1" placeholder="Seal 1">
-<input id="code2" placeholder="Seal 2">
-<input id="code3" placeholder="Seal 3">
-<input id="code4" placeholder="Seal 4">
-<input id="code5" placeholder="Seal 5">
-<input id="code6" placeholder="Seal 6">
-
-<button onclick="checkCodes()">Unlock</button>
-
-<p id="result"></p>
+  <button id="unlockBtn">Unlock</button>
+  <p id="result"></p>
+</div>
 
 <script>
+// 🔓 Unlock after April 1
 function checkDateUnlock() {
   const now = new Date();
-
-  // Set unlock date (April 1)
-  const unlockDate = new Date(now.getFullYear(), 3, 1); // Month is 0-based → 3 = April
-
+  const unlockDate = new Date(now.getFullYear(), 3, 1);
   if (now >= unlockDate) {
     document.getElementById("splash").style.display = "none";
     document.getElementById("mainContent").style.display = "block";
-  } else {
-    document.getElementById("mainContent").style.display = "none";
   }
 }
-
-// Run on load
 checkDateUnlock();
-  
-async function checkCodes() {
-  const lastAttempt = localStorage.getItem("lastAttempt");
-  const now = Date.now();
 
-  if (lastAttempt && now - lastAttempt < 5000) {
-    resultEl.innerText = "⏳ Slow down, the dragon is watching...";
-    resultEl.style.color = "yellow";
-    return;
-  }
-
-  localStorage.setItem("lastAttempt", now);
-  
+// 🚀 Verify passcodes via backend
+document.getElementById("unlockBtn").addEventListener("click", async () => {
   const resultEl = document.getElementById("result");
-  const button = document.querySelector("button");
+  const button = document.getElementById("unlockBtn");
   button.disabled = true;
 
   const inputs = [
-    code1.value,
-    code2.value,
-    code3.value,
-    code4.value,
-    code5.value,
-    code6.value
+    code1.value.trim(),
+    code2.value.trim(),
+    code3.value.trim(),
+    code4.value.trim(),
+    code5.value.trim(),
+    code6.value.trim()
   ];
 
-  // 🐉 Start backend request immediately
-  const fetchPromise = fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg",
-      "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXRjandtdG9ib3NsbmpneGhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NjYwMjgsImV4cCI6MjA5MDA0MjAyOH0.tSST6-uomzRp_9z6FzQiDI5H3DX1O7prYV-Sewd5vZg"
-    },
-    body: JSON.stringify({ inputs })
-  }).then(res => res.json());
-
-  // 🎬 Show messages while request runs
-  const messages = [
-    "🔐 Trying to pick the lock...",
-    "🗝️ Jiggling the keys...",
-    "🪨 Throwing a rock at it..."
-  ];
-
-  for (let i = 0; i < messages.length; i++) {
-    resultEl.innerText = messages[i];
-    await new Promise(resolve => setTimeout(resolve, 3000));
+  if (inputs.some(i => !i)) {
+    resultEl.innerText = "⛔ All 6 seals are required!";
+    resultEl.style.color = "yellow";
+    button.disabled = false;
+    return;
   }
 
-  // ⏳ Wait for backend result (if not already finished)
-  const data = await fetchPromise;
+  resultEl.innerText = "🔐 Attempting to unlock the vault...";
 
-  // 🎯 Show result
-  if (data.success) {
-    resultEl.innerText = "🔥 Success! The vault cracks open...";
-    resultEl.style.color = "lime";
-  
-    localStorage.setItem("dragonToken", data.token);
-    localStorage.setItem("dragonTime", Date.now());
-  
-    setTimeout(() => {
-      window.location.href = "locked.html";
-    }, 1500);
-  
-  } else {
-    resultEl.innerText = `❌ ${data.correctCount}/6 seals correct`;
-    resultEl.style.color = "orange";
+  try {
+    const res = await fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": "<YOUR_SUPABASE_ANON_KEY>"
+      },
+      body: JSON.stringify({ inputs })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      resultEl.innerText = "🔥 Success! The vault cracks open...";
+      resultEl.style.color = "lime";
+
+      // ✅ Redirect to locked.html with token & special passcode
+      const params = new URLSearchParams();
+      params.set("token", data.token);
+      params.set("special", data.specialPasscode);
+      setTimeout(() => {
+        window.location.href = `locked.html?${params.toString()}`;
+      }, 1500);
+    } else {
+      resultEl.innerText = `❌ ${data.correctCount}/6 seals correct`;
+      resultEl.style.color = "orange";
+      button.disabled = false;
+    }
+
+  } catch (err) {
+    resultEl.innerText = "⚠️ Server error. Try again.";
+    resultEl.style.color = "yellow";
     button.disabled = false;
   }
-}
+});
+
+// 🐍 Snake Game (Konami code)
 const konamiCode = [
-  "ArrowUp","ArrowUp",
-  "ArrowDown","ArrowDown",
-  "ArrowLeft","ArrowRight",
-  "ArrowLeft","ArrowRight",
+  "ArrowUp","ArrowUp","ArrowDown","ArrowDown",
+  "ArrowLeft","ArrowRight","ArrowLeft","ArrowRight",
   "b","a"
 ];
-
 let konamiIndex = 0;
-
 document.addEventListener("keydown", (e) => {
   if (e.key === konamiCode[konamiIndex]) {
     konamiIndex++;
-
     if (konamiIndex === konamiCode.length) {
       launchSnakeGame();
       konamiIndex = 0;
     }
-  } else {
-    konamiIndex = 0;
-  }
+  } else konamiIndex = 0;
 });
 
 function launchSnakeGame() {
-  // Create overlay
   const overlay = document.createElement("div");
   overlay.style.position = "fixed";
   overlay.style.top = 0;
@@ -181,20 +158,17 @@ function launchSnakeGame() {
   overlay.style.justifyContent = "center";
   overlay.style.zIndex = 9999;
 
-  // Title
   const title = document.createElement("h1");
   title.innerText = "🐍 Snake Unlocked!";
   title.style.color = "lime";
   overlay.appendChild(title);
 
-  // Canvas
   const canvas = document.createElement("canvas");
   canvas.width = 400;
   canvas.height = 400;
   canvas.style.border = "2px solid lime";
   overlay.appendChild(canvas);
 
-  // Exit button
   const exitBtn = document.createElement("button");
   exitBtn.innerText = "Exit Game";
   exitBtn.style.marginTop = "10px";
@@ -202,22 +176,16 @@ function launchSnakeGame() {
   overlay.appendChild(exitBtn);
 
   document.body.appendChild(overlay);
-
   startSnake(canvas);
 }
 
 function startSnake(canvas) {
   const ctx = canvas.getContext("2d");
-
   const grid = 20;
   let snake = [{ x: 200, y: 200 }];
-  let dx = grid;
-  let dy = 0;
-
-  let food = {
-    x: Math.floor(Math.random() * 20) * grid,
-    y: Math.floor(Math.random() * 20) * grid
-  };
+  let dx = grid, dy = 0;
+  let food = { x: Math.floor(Math.random()*20)*grid, y: Math.floor(Math.random()*20)*grid };
+  let count = 0;
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft" && dx === 0) { dx = -grid; dy = 0; }
@@ -228,56 +196,35 @@ function startSnake(canvas) {
 
   function loop() {
     requestAnimationFrame(loop);
-
     if (++count < 6) return;
     count = 0;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // move snake
     const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-
-    // wrap around
     head.x = (head.x + canvas.width) % canvas.width;
     head.y = (head.y + canvas.height) % canvas.height;
-
     snake.unshift(head);
 
-    // eat food
     if (head.x === food.x && head.y === food.y) {
-      food = {
-        x: Math.floor(Math.random() * 20) * grid,
-        y: Math.floor(Math.random() * 20) * grid
-      };
-    } else {
-      snake.pop();
-    }
+      food = { x: Math.floor(Math.random()*20)*grid, y: Math.floor(Math.random()*20)*grid };
+    } else snake.pop();
 
-    // draw food
     ctx.fillStyle = "red";
-    ctx.fillRect(food.x, food.y, grid - 1, grid - 1);
+    ctx.fillRect(food.x, food.y, grid-1, grid-1);
 
-    // draw snake
     ctx.fillStyle = "lime";
-    snake.forEach(segment => {
-      ctx.fillRect(segment.x, segment.y, grid - 1, grid - 1);
-    });
+    snake.forEach(s => ctx.fillRect(s.x, s.y, grid-1, grid-1));
 
-    // collision (self)
     for (let i = 1; i < snake.length; i++) {
       if (head.x === snake[i].x && head.y === snake[i].y) {
-        snake = [{ x: 200, y: 200 }];
-        dx = grid;
-        dy = 0;
+        snake = [{ x: 200, y: 200 }]; dx = grid; dy = 0;
       }
     }
   }
 
-  let count = 0;
-  requestAnimationFrame(loop);
+  loop();
 }
 </script>
-
 </body>
-</div>
 </html>
