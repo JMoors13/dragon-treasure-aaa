@@ -85,18 +85,18 @@
       ];
 
       // log("📥 Raw input codes:");
-      log(JSON.stringify(codes, null, 2));
+      // log(JSON.stringify(codes, null, 2));
 
       const filteredCodes = codes.filter(c => c !== "");
 
       if (filteredCodes.length !== 6) {
         resultDiv.innerHTML = "⚠️ Enter all 6 seals";
-        log("❌ Not all inputs filled");
+        // log("❌ Not all inputs filled");
         return;
       }
 
       try {
-        log("📡 Sending request to Edge Function...");
+        // log("📡 Sending request to Edge Function...");
 
         const res = await fetch("https://pwqtcjwmtoboslnjgxhj.supabase.co/functions/v1/check-codes", {
           method: "POST",
@@ -108,23 +108,23 @@
           body: JSON.stringify({ codes: filteredCodes })
         });
 
-        log(`📬 Response status: ${res.status}`);
+        // log(`📬 Response status: ${res.status}`);
 
         const text = await res.text();
-        log("📦 Raw response:");
-        log(text);
+        // log("📦 Raw response:");
+        // log(text);
 
         let data;
         try {
           data = JSON.parse(text);
         } catch {
-          log("❌ Failed to parse JSON");
+          // log("❌ Failed to parse JSON");
           resultDiv.innerHTML = "❌ Invalid server response";
           return;
         }
 
-        log("✅ Parsed response:");
-        log(JSON.stringify(data, null, 2));
+        // log("✅ Parsed response:");
+        // log(JSON.stringify(data, null, 2));
 
         const correct = data.correctCount ?? 0;
         const total = data.total ?? 6;
@@ -132,16 +132,16 @@
         resultDiv.innerHTML = `❌ ${correct}/${total} seals correct`;
 
         if (data.success) {
-          log("🚀 SUCCESS — redirecting...");
+          // log("🚀 SUCCESS — redirecting...");
           window.location.href =
             `locked.html?token=${data.token}&message=${encodeURIComponent(data.message)}`;
         } else {
-          log("🔒 Not successful");
+          // log("🔒 Not successful");
         }
 
       } catch (err) {
-        log("🔥 FETCH ERROR:");
-        log(err.toString());
+        // log("🔥 FETCH ERROR:");
+        // log(err.toString());
         resultDiv.innerHTML = "❌ Network error";
       }
     }
